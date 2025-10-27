@@ -1,9 +1,10 @@
-﻿# UEMCON -2025
+﻿# IEEE IEMCON - 2025
 ##
-## IBM Louis V. Gerstner, Jr. Center for Learning
-#
+## University of California, Berkeley
+#  https://editorsmanager.com/
 #
 
-> git clone https://github.com/wonder-phil/UEMCON-2025
+> git clone https://github.com/wonder-phil/wonder-phil.github.io
+
 
 
