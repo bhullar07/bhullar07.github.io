@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script>
+        
+      // Sun colour cycling
+      AFRAME.registerComponent('sun-glow', {
+        schema: { duration: { type: 'number', default: 2000 } },
+        init: function () {
+          this.colors = ['#ffdd00', '#ff8800', '#ffaa00', '#ff4400', '#ffee44'];
+          this.index = 0;
+          this.elapsed = 0;
+        },
+        tick: function (time, delta) {
+          this.elapsed += delta;
+          if (this.elapsed >= this.data.duration) {
+            this.elapsed = 0;
+            this.index = (this.index + 1) % this.colors.length;
+            this.el.setAttribute('material', 'emissive', this.colors[this.index]);
+          }
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <img id="sunTex"     src="https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg" crossorigin="anonymous">
+        <img id="mercuryTex" src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg" crossorigin="anonymous">
+        <img id="venusTex"   src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg" crossorigin="anonymous">
+        <img id="earthTex"   src="https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" crossorigin="anonymous">
+        <img id="marsTex"    src="https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg" crossorigin="anonymous">
+        <img id="jupiterTex" src="https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg" crossorigin="anonymous">
+      </a-assets>
+
+      <!-- Lights -->
+      <a-light type="ambient" color="#ffffff" intensity="1"></a-light>
+      <a-light type="point" color="#ffddaa" intensity="1" position="0 0 0" distance="100"></a-light>
+
+      <!-- SUN -->
+      <a-sphere id="sun" position="0 0 0" radius="3"
+        material="src: #sunTex; shader: flat; emissive: #ffdd00; emissiveIntensity: 1">
+     
+      </a-sphere>
+
+      <!-- MERCURY -->
+      <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
+        <a-sphere position="6 0 0" radius="0.4" material="src: #mercuryTex; shader: standard; roughness: 1; metalness: 0"></a-sphere>
+      </a-entity>
+
+      <!-- VENUS -->
+      <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+        <a-sphere position="9 0 0" radius="0.6" material="src: #venusTex; shader: standard; roughness: 1; metalness: 0"></a-sphere>
+      </a-entity>
+
+      <!-- EARTH -->
+      <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 12000; easing: linear">
+        <a-sphere position="12 0 0" radius="0.7" material="src: #earthTex; shader: standard; roughness: 1; metalness: 0"></a-sphere>
+      </a-entity>
+
+      <!-- MARS -->
+      <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 16000; easing: linear">
+        <a-sphere position="15 0 0" radius="0.5" material="src: #marsTex; shader: standard; roughness: 1; metalness: 0"></a-sphere>
+      </a-entity>
+
+      <!-- JUPITER -->
+      <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 22000; easing: linear">
+        <a-sphere position="19 0 0" radius="1.4" material="src: #jupiterTex; shader: standard; roughness: 1; metalness: 0"></a-sphere>
+      </a-entity>
+
+      <!-- Camera — unchanged from your original -->
+      <a-entity camera look-controls wasd-controls position="0 10 25"></a-entity>
+      <a-sky color="#000000"></a-sky>
+
+    </a-scene>
+  </body>
+</html>

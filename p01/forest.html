@@ -9,9 +9,11 @@
     <script>
      document.addEventListener('DOMContentLoaded', () => {
         const isLocal = ['localhost','127.0.0.1','[::1]'].includes(location.hostname);
-        const src = isLocal
-          ? 'http://localhost:8000/p01/IMAGES/Moving_Forest_1050_700.webp'
-          : './IMAGES/Moving_Forest_1050_700.webp';
+        
+
+        const imageURL = 'https://corsproxy.io/?url=https://media.istockphoto.com/id/1446199740/photo/path-through-a-sunlit-forest.jpg?s=612x612&w=0&k=20&c=DuozAED7qfI5E6PcVb4bHtFJ_uM_n1duok56j_liLEA=';
+        
+        const src = isLocal ? imageURL : imageURL;
 
         const img = document.getElementById('forest');
         img.setAttribute('src', src);        // set it
@@ -25,7 +27,7 @@
       </script>
     <a-scene>
       <a-assets>
-        <img id="forest"  crossorigin="anonymous"> <!-- src="http://localhost:8000/p01/IMAGES/Moving_Forest_1050_700.webp"-->
+        <img id="forest" src="https://media.istockphoto.com/id/1446199740/photo/path-through-a-sunlit-forest.jpg?s=612x612&w=0&k=20&c=DuozAED7qfI5E6PcVb4bHtFJ_uM_n1duok56j_liLEA=" crossorigin="anonymous"> <!-- src="http://localhost:8000/p01/IMAGES/Moving_Forest_1050_700.webp"-->
       </a-assets>
       <a-sky id="mySky"
         src="#forest"	position="-2.5  0 -1.5"

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Seattle VR Experience</title>
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      
+      <a-assets>
+        <img id="seattle-sky" 
+             src="https://upload.wikimedia.org/wikipedia/commons/1/1e/Seattle_Downtown_Aerial%2C_July_2025_%28zoomed_and_perspective_corrected%29.jpg" 
+             crossorigin="anonymous">
+      </a-assets>
+
+      <a-sky src="#seattle-sky" rotation="0 -90 0"></a-sky>
+
+      <a-text value="Welcome to Seattle" 
+              position="0 2 -3" 
+              align="center" 
+              color="#FFFFFF" 
+              width="6">
+      </a-text>
+
+    </a-scene>
+  </body>
+</html>
