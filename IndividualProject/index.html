@@ -54,37 +54,49 @@ document.body.onclick = () => {
   gameStarted = true;
 };
 
-AFRAME.registerComponent('head-move-rig'), {
+AFRAME.registerComponent('head-move-rig', {
+  init: function () {
+    // Create these ONCE when the game starts to save battery/memory
+    this.rigWorldPos = new THREE.Vector3();
+    this.objWorldPos = new THREE.Vector3();
+  },
+
   tick: function () {
     if (!gameStarted) return;
 
-    // Create temporary vectors to store world positions
-    let rigWorldPos = new THREE.Vector3();
-    let objWorldPos = new THREE.Vector3();
+    // Movement Logic
+    let camRot = document.querySelector('#playerCam').getAttribute('rotation');
+    let rigPos = this.el.getAttribute('position');
 
+    if (camRot.y > 6) rigPos.x -= 0.07;
+    if (camRot.y < -6) rigPos.x += 0.07;
+    rigPos.x = Math.max(Math.min(rigPos.x, 6), -6);
+    this.el.setAttribute('position', rigPos);
+
+    score++;
+    document.querySelector("#scoreText").setAttribute("value", "Score: " + score);
+
+    // Obstacles and Collision
     document.querySelectorAll(".obstacle").forEach(ob => {
       ob.object3D.position.z += speed;
 
-      // Reset obstacle logic...
       if (ob.object3D.position.z > 2) {
         ob.object3D.position.z = -30 - Math.random() * 10;
         let lanes = [-4, 0, 4];
         ob.object3D.position.x = lanes[Math.floor(Math.random() * lanes.length)];
       }
 
-      // GET ACCURATE WORLD POSITIONS 
-      this.el.object3D.getWorldPosition(rigWorldPos);
-      ob.object3D.getWorldPosition(objWorldPos);
+      // GET ACCURATE WORLD POSITIONS
+      this.el.object3D.getWorldPosition(this.rigWorldPos);
+      ob.object3D.getWorldPosition(this.objWorldPos);
 
-      // Check distance in 3D space 
-      let dist = objWorldPos.distanceTo(rigWorldPos);
+      let dist = this.objWorldPos.distanceTo(this.rigWorldPos);
 
-      if (dist < 1.8) { // Adjust sensitivity if needed
+      if (dist < 1.8) { 
         gameStarted = false;
-        speed = 0; // Stop movement immediately
+        speed = 0;
         document.querySelector("#bgm").pause();
         document.querySelector("#crash").play();
-        
         setTimeout(() => {
           alert("Game Over! Score: " + score);
           location.reload();
@@ -92,7 +104,9 @@ AFRAME.registerComponent('head-move-rig'), {
       }
     });
   }
-}
+}); // Notice the closing parenthesis is HERE now
+  
+
 </script>
 </body>
 </html>
