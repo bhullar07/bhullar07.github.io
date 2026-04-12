@@ -5,21 +5,21 @@
   <title>Abhay Dodge VR</title>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 </head>
- 
+
 <body>
- 
+
 <div id="startScreen" style="position:absolute; width:100%; height:100%; background:black; color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:30px; z-index:10;">
   <div>Abhay Bhullar - CMPT 461</div>
   <div style="font-size: 20px; margin-top: 20px;">Click to Start</div>
 </div>
- 
+
 <a-scene background="color: #87CEEB">
     <a-assets>
       <img id="buildingTex" src="https://i.imgur.com/9Q9Z1Zm.jpg">
       <audio id="bgm" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b4c3b.mp3?filename=arcade-music-loop-110624.mp3" loop="true"></audio>
       <audio id="crash" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_270f49b9f1.mp3?filename=retro-game-over-213.wav"></audio>
     </a-assets>
- 
+
     <a-entity id="rig" position="0 0 0" head-move-rig>
         <a-entity id="playerCam" camera look-controls position="0 1.6 0">
             <a-text id="scoreText" value="Score: 0" position="-0.8 0.5 -1" width="2" color="black"></a-text>
@@ -36,15 +36,17 @@
     <a-box class="obstacle" position="3 4 -15" width="2" height="8" depth="2" material="src: #buildingTex"></a-box>
     <a-box class="obstacle" position="-3 2.5 -20" width="2" height="5" depth="2" material="src: #buildingTex"></a-box>
 </a-scene>
- 
+
 <script>
 let score = 0;
 let speed = 0.10;
 let level = 1;
 let gameStarted = false;
- 
+let gameOver = false; // separate flag to prevent multiple triggers
+
 document.body.onclick = () => {
-  // Fix for iOS Motion Sensors
+  if (gameOver) return; // don't restart on click mid game-over sequence
+
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     DeviceOrientationEvent.requestPermission().catch(console.error);
   }
@@ -53,61 +55,71 @@ document.body.onclick = () => {
   document.querySelector("#bgm").play();
   gameStarted = true;
 };
- 
+
 AFRAME.registerComponent('head-move-rig', {
   init: function () {
     this.rigWorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
   },
- 
+
   tick: function () {
-    if (!gameStarted) return;
- 
-    // Movement Logic
+    if (!gameStarted || gameOver) return;
+
+    // --- Player Movement ---
     let camRot = document.querySelector('#playerCam').getAttribute('rotation');
     let rigPos = this.el.getAttribute('position');
- 
-    if (camRot.y > 6) rigPos.x -= 0.07;
+
+    if (camRot.y > 6)  rigPos.x -= 0.07;
     if (camRot.y < -6) rigPos.x += 0.07;
     rigPos.x = Math.max(Math.min(rigPos.x, 6), -6);
     this.el.setAttribute('position', rigPos);
- 
+
     score++;
     document.querySelector("#scoreText").setAttribute("value", "Score: " + score);
- 
-    // Obstacles and Collision
+
+    // Player X stays tracked via rigPos; player is always at z=0
+    const playerX = rigPos.x;
+    const playerZ = 0; // rig stays at z=0, obstacles move toward it
+
+    // --- Obstacles ---
     document.querySelectorAll(".obstacle").forEach(ob => {
+      // Move obstacle toward player
       ob.object3D.position.z += speed;
- 
+
+      // Recycle obstacle when it passes the player
       if (ob.object3D.position.z > 2) {
         ob.object3D.position.z = -30 - Math.random() * 10;
         let lanes = [-4, 0, 4];
         ob.object3D.position.x = lanes[Math.floor(Math.random() * lanes.length)];
       }
- 
-      // Get world positions
-      this.el.object3D.getWorldPosition(this.rigWorldPos);
-      ob.object3D.getWorldPosition(this.objWorldPos);
- 
-      // Box collision using X and Z only (avoids Y mismatch between rig and building center)
-      let dx = Math.abs(this.objWorldPos.x - this.rigWorldPos.x);
-      let dz = Math.abs(this.objWorldPos.z - this.rigWorldPos.z);
- 
-      // building half-width (1.0) + player radius (0.4) = 1.4
-      if (dx < 1.4 && dz < 1.4) {
-        gameStarted = false;
-        speed = 0;
-        document.querySelector("#bgm").pause();
-        document.querySelector("#crash").play();
-        setTimeout(() => {
-          alert("Game Over! Score: " + score);
-          location.reload();
-        }, 300);
+
+      // Read obstacle position directly from object3D (up-to-date after move above)
+      const obX = ob.object3D.position.x;
+      const obZ = ob.object3D.position.z;
+
+      const dx = Math.abs(obX - playerX);
+      const dz = Math.abs(obZ - playerZ);
+
+      // building half-width=1.0 + player body ~0.5 = 1.5
+      if (dx < 1.5 && dz < 1.5) {
+        triggerGameOver();
       }
     });
   }
 });
- 
+
+function triggerGameOver() {
+  if (gameOver) return; // prevent double trigger
+  gameOver = true;
+  gameStarted = false;
+  speed = 0;
+  document.querySelector("#bgm").pause();
+  document.querySelector("#crash").play();
+  setTimeout(() => {
+    alert("Game Over! Score: " + score);
+    location.reload();
+  }, 500);
+}
 </script>
 </body>
 </html>
