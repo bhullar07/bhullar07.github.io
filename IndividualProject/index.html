@@ -10,7 +10,7 @@
 
 <div id="startScreen" style="position:absolute; width:100%; height:100%; background:black; color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:30px; z-index:10;">
   <div>Abhay Bhullar - CMPT 461</div>
-  <div style="font-size: 20px; margin-top: 20px;">Click to Start & Enable Sensors</div>
+  <div style="font-size: 20px; margin-top: 20px;">Click to Start</div>
 </div>
 
 <a-scene background="color: #87CEEB">
@@ -54,48 +54,37 @@ document.body.onclick = () => {
   gameStarted = true;
 };
 
-AFRAME.registerComponent('head-move-rig', {
+AFRAME.registerComponent('head-move-rig'), {
   tick: function () {
     if (!gameStarted) return;
 
-    // Get rotation from the camera inside the rig
-    let camRot = document.querySelector('#playerCam').getAttribute('rotation');
-    let rigPos = this.el.getAttribute('position');
-
-    // Head-tilt/direction control: moving the RIG x-position [cite: 17]
-    if (camRot.y > 6) rigPos.x -= 0.07;
-    if (camRot.y < -6) rigPos.x += 0.07;
-
-    // Boundary check so you don't fly off the road
-    rigPos.x = Math.max(Math.min(rigPos.x, 6), -6);
-    this.el.setAttribute('position', rigPos);
-
-    score += 1;
-    document.querySelector("#scoreText").setAttribute("value", "Score: " + score);
-
-    // LEVEL SYSTEM 
-    if (score > 1500 && level === 1) {
-      level = 2;
-      speed = 0.25;
-      document.querySelector("#levelText").setAttribute("value", "Level 2");
-      document.querySelector('a-sky').setAttribute('color', '#2C3E50'); // Visual level change
-    }
+    // Create temporary vectors to store world positions
+    let rigWorldPos = new THREE.Vector3();
+    let objWorldPos = new THREE.Vector3();
 
     document.querySelectorAll(".obstacle").forEach(ob => {
       ob.object3D.position.z += speed;
 
+      // Reset obstacle logic...
       if (ob.object3D.position.z > 2) {
         ob.object3D.position.z = -30 - Math.random() * 10;
         let lanes = [-4, 0, 4];
         ob.object3D.position.x = lanes[Math.floor(Math.random() * lanes.length)];
       }
 
-      // Collision detection [cite: 32]
-      let dist = ob.object3D.position.distanceTo(rigPos);
-      if (dist < 2) {
+      // GET ACCURATE WORLD POSITIONS 
+      this.el.object3D.getWorldPosition(rigWorldPos);
+      ob.object3D.getWorldPosition(objWorldPos);
+
+      // Check distance in 3D space 
+      let dist = objWorldPos.distanceTo(rigWorldPos);
+
+      if (dist < 1.8) { // Adjust sensitivity if needed
         gameStarted = false;
+        speed = 0; // Stop movement immediately
         document.querySelector("#bgm").pause();
         document.querySelector("#crash").play();
+        
         setTimeout(() => {
           alert("Game Over! Score: " + score);
           location.reload();
@@ -103,7 +92,7 @@ AFRAME.registerComponent('head-move-rig', {
       }
     });
   }
-});
+}
 </script>
 </body>
 </html>
